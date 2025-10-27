@@ -1,3 +1,4 @@
+// src/main.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import {
   getAuth,
@@ -29,6 +30,8 @@ const chatContainer = document.querySelector(".chat-container");
 const loginContainer = document.querySelector(".login-container");
 const sendBtn = document.getElementById("send-btn");
 const messagesContainer = document.getElementById("messages");
+const fileInput = document.getElementById("file-input");
+const userInput = document.getElementById("user-input");
 
 // Historial local del chat
 let messages = JSON.parse(localStorage.getItem("chatHistory")) || [];
@@ -47,8 +50,6 @@ const BACKEND_URL = "https://finalelectiva.onrender.com/analyze-pdf";
 
 // 👉 Evento: Enviar pregunta al backend
 sendBtn.addEventListener("click", async () => {
-  const fileInput = document.getElementById("file-input");
-  const userInput = document.getElementById("user-input");
   const question = userInput.value.trim();
 
   if (!fileInput.files[0]) {
@@ -89,12 +90,17 @@ sendBtn.addEventListener("click", async () => {
 });
 
 // 👉 Autenticación con Google
-loginBtn.addEventListener("click", () => {
-  signInWithPopup(auth, provider);
+loginBtn.addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    alert(error.message);
+  }
 });
 
 logoutBtn.addEventListener("click", () => {
   signOut(auth);
+  localStorage.removeItem("chatHistory");
 });
 
 // 👉 Cambios en sesión

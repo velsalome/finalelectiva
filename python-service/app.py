@@ -17,7 +17,7 @@ app = FastAPI()
 # Configuración CORS para conectar frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Cambia al puerto de tu frontend si es distinto
+    allow_origins=["https://finalelectiva1-mp2pupxik-velsalomes-projects.vercel.app/"],  # Reemplaza con tu URL de frontend en Vercel
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,13 +31,11 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
     return text
 
 def chunk_text(text: str, max_chars: int = 3000):
-    """Divide el texto en trozos de hasta max_chars caracteres (intentar evitar cortar oraciones)."""
     chunks = []
     start = 0
     n = len(text)
     while start < n:
         end = min(start + max_chars, n)
-        # intenta retroceder hasta el último punto o salto de línea para cortar en oraciones
         if end < n:
             cut = text.rfind('\n', start, end)
             if cut <= start:
@@ -79,8 +77,8 @@ async def analyze_pdf(file: UploadFile = File(...)):
             return JSONResponse(status_code=400, content={"error": "PDF no contiene texto extraíble."})
 
         chunks = chunk_text(text, max_chars=3500)
-
         results = []
+
         for i, c in enumerate(chunks):
             prompt = (
                 "Eres un asistente que analiza documentos. "
@@ -110,4 +108,3 @@ async def analyze_pdf(file: UploadFile = File(...)):
     except Exception as e:
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
-    
