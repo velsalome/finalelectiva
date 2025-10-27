@@ -1,8 +1,14 @@
 // src/main.js
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "firebase/auth";
 
-// Configuración real de Firebase
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyApJUYOX0NgWMuvB1Zkn6UuX-3AnWKTehk",
   authDomain: "chatrag-f0f58.firebaseapp.com",
@@ -41,20 +47,19 @@ function renderMessages() {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-
 // Mostrar chat si usuario está logueado
 onAuthStateChanged(auth, user => {
-  if(user){
+  if (user) {
     loginContainer.style.display = "none";
     chatContainer.style.display = "block";
-    renderMessages(); // Renderizar historial sin duplicar
+    renderMessages();
   } else {
     loginContainer.style.display = "block";
     chatContainer.style.display = "none";
   }
 });
 
-// Login con Google (desactiva botón mientras procesa)
+// Login con Google
 googleLoginBtn.addEventListener("click", async () => {
   googleLoginBtn.disabled = true;
   try {
@@ -69,31 +74,44 @@ googleLoginBtn.addEventListener("click", async () => {
 // Cerrar sesión
 logoutBtn.addEventListener("click", () => {
   signOut(auth);
-  localStorage.removeItem("chatHistory"); // borrar historial
+  localStorage.removeItem("chatHistory");
 });
 
 // Enviar pregunta
 sendBtn.addEventListener("click", async () => {
   const fileInput = document.getElementById("file-input");
   const userInput = document.getElementById("user-input");
-  if(!fileInput.files[0]) { alert("Sube un PDF antes de preguntar."); return; }
+
+  if (!fileInput.files[0]) { 
+    alert("Sube un PDF antes de preguntar.");
+    return; 
+  }
+
   const question = userInput.value.trim();
-  if(!question) return;
+  if (!question) return;
 
   const formData = new FormData();
   formData.append("file", fileInput.files[0]);
+  formData.append("question", question); // ✅ Ahora se envía la pregunta
 
+  // Mostrar mensaje del usuario
   messages.push({ sender: "Tú", text: question });
   renderMessages();
   localStorage.setItem("chatHistory", JSON.stringify(messages));
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/analyze-pdf", { method:"POST", body:formData });
+    const response = await fetch("http://127.0.0.1:8000/analyze-pdf", {
+      method: "POST",
+      body: formData
+    });
+
     const data = await response.json();
-    const reply = data.analysis || data.error;
+    const reply = data.analysis || data.error || "Sin respuesta";
+
     messages.push({ sender: "IA", text: reply });
     renderMessages();
     localStorage.setItem("chatHistory", JSON.stringify(messages));
+
   } catch (error) {
     messages.push({ sender: "IA", text: "Error al conectar con el servidor." });
     renderMessages();
