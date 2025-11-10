@@ -17,7 +17,7 @@ app = FastAPI()
 # 🔹 Configurar CORS (sin barra al final)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://finalelectiva1-mp2pupxik-velsalomes-projects.vercel.app"],
+    allow_origins=["https://finalelectiva1.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
