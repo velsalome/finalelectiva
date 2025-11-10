@@ -8,7 +8,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-// 👉 Configuración Firebase
+// 🔹 Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDFobAI1cHbCG1KzyQ9z9r-mqMbnLmPy6I",
   authDomain: "chatexamengpt.firebaseapp.com",
@@ -18,12 +18,12 @@ const firebaseConfig = {
   appId: "1:460671834626:web:60b4d6f080a276175d6945"
 };
 
-// Inicializa Firebase
+// 🔹 Inicializar Firebase y autenticación
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// 👉 Botones y elementos de UI
+// 🔹 Elementos de la interfaz
 const loginBtn = document.getElementById("google-login");
 const logoutBtn = document.getElementById("logout-btn");
 const chatContainer = document.querySelector(".chat-container");
@@ -33,11 +33,11 @@ const messagesContainer = document.getElementById("messages");
 const fileInput = document.getElementById("file-input");
 const userInput = document.getElementById("user-input");
 
-// Historial local del chat
+// 🔹 Historial del chat
 let messages = JSON.parse(localStorage.getItem("chatHistory")) || [];
 renderMessages();
 
-// 👉 Mostrar historial
+// 🔹 Función para renderizar mensajes
 function renderMessages() {
   messagesContainer.innerHTML = messages
     .map(m => `<div class="message"><strong>${m.sender}:</strong> ${m.text}</div>`)
@@ -45,24 +45,25 @@ function renderMessages() {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// ✅ URL del backend en Render (producción)
+// ✅ URL del backend (Render)
 const BACKEND_URL = "https://finalelectiva.onrender.com/analyze-pdf";
 
-// 👉 Evento: Enviar pregunta al backend
+// 🔹 Evento de enviar pregunta
 sendBtn.addEventListener("click", async () => {
   const question = userInput.value.trim();
-
   if (!fileInput.files[0]) {
     alert("Sube un archivo PDF antes de preguntar.");
     return;
   }
-  if (!question) return;
+  if (!question) {
+    alert("Escribe una pregunta para enviar.");
+    return;
+  }
 
   const formData = new FormData();
   formData.append("file", fileInput.files[0]);
   formData.append("question", question);
 
-  // Guardar pregunta del usuario
   messages.push({ sender: "Tú", text: question });
   renderMessages();
   localStorage.setItem("chatHistory", JSON.stringify(messages));
@@ -74,22 +75,20 @@ sendBtn.addEventListener("click", async () => {
     });
 
     const data = await response.json();
-    const reply = data.analysis || data.error || "No se obtuvo respuesta";
+    const reply = data.analysis || data.error || "No se obtuvo respuesta.";
 
-    // Guardar respuesta de IA
     messages.push({ sender: "IA", text: reply });
     renderMessages();
     localStorage.setItem("chatHistory", JSON.stringify(messages));
-
   } catch (error) {
-    messages.push({ sender: "IA", text: "Error al conectar con el servidor" });
+    messages.push({ sender: "IA", text: "Error al conectar con el servidor." });
     renderMessages();
   }
 
   userInput.value = "";
 });
 
-// 👉 Autenticación con Google
+// 🔹 Autenticación con Google
 loginBtn.addEventListener("click", async () => {
   try {
     await signInWithPopup(auth, provider);
@@ -103,7 +102,7 @@ logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("chatHistory");
 });
 
-// 👉 Cambios en sesión
+// 🔹 Cambios de sesión
 onAuthStateChanged(auth, (user) => {
   if (user) {
     loginContainer.style.display = "none";
